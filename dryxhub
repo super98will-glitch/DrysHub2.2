@@ -1,0 +1,430 @@
+-- 🌌 REBELDE X DRYX HUB - V3.2 PREMIUM FINAL + ESP (TEMA ZERO TWO)
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local SENHA_CORRETA = "diegolenda"
+local IMAGE_ID = "rbxassetid://102248074514708" -- O ID que você mandou
+
+-- ===== TEMA ZERO TWO =====
+local Theme = {
+	Background = Color3.fromRGB(15, 15, 15), 
+	Sidebar = Color3.fromRGB(25, 20, 25),    
+	Accent = Color3.fromRGB(255, 105, 180),  -- Rosa Zero Two
+	Accent2 = Color3.fromRGB(220, 20, 60),   -- Vermelho Chifres
+	Text = Color3.fromRGB(255, 255, 255),
+	SecondaryText = Color3.fromRGB(200, 200, 200),
+	Button = Color3.fromRGB(40, 30, 40)
+}
+
+if player.PlayerGui:FindFirstChild("RebeldeHubPremium") then
+	player.PlayerGui.RebeldeHubPremium:Destroy()
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "RebeldeHubPremium"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local function applyDesign(obj, radius, strokeColor)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius or 6)
+	corner.Parent = obj
+	if strokeColor then
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = strokeColor
+		stroke.Thickness = 1.5
+		stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		stroke.Transparency = 0.4
+		stroke.Parent = obj
+	end
+end
+
+-- ================= LOGIN =================
+local loginFrame = Instance.new("Frame")
+loginFrame.Size = UDim2.new(0, 320, 0, 380)
+loginFrame.Position = UDim2.new(0.5, -160, 0.5, -190)
+loginFrame.BackgroundColor3 = Theme.Background
+loginFrame.Parent = gui
+applyDesign(loginFrame, 15, Theme.Accent)
+
+-- Imagem de Fundo do Login
+local loginBgImg = Instance.new("ImageLabel")
+loginBgImg.Size = UDim2.new(1, 0, 1, 0)
+loginBgImg.BackgroundTransparency = 1
+loginBgImg.ImageTransparency = 0.6 -- Ajuste aqui a visibilidade da Zero Two
+loginBgImg.Image = IMAGE_ID
+loginBgImg.ScaleType = Enum.ScaleType.Crop
+loginBgImg.Parent = loginFrame
+applyDesign(loginBgImg, 15)
+
+local logo = Instance.new("TextLabel")
+logo.Size = UDim2.new(1, 0, 0, 100)
+logo.Text = "002"
+logo.Font = Enum.Font.GothamBold
+logo.TextSize = 60
+logo.TextColor3 = Theme.Accent2
+logo.BackgroundTransparency = 1
+logo.ZIndex = 2
+logo.Parent = loginFrame
+
+local passBox = Instance.new("TextBox")
+passBox.Size = UDim2.new(0.85, 0, 0, 45)
+passBox.Position = UDim2.new(0.075, 0, 0.45, 0)
+passBox.PlaceholderText = "SENHA"
+passBox.Text = ""
+passBox.BackgroundColor3 = Theme.Button
+passBox.TextColor3 = Color3.new(1,1,1)
+passBox.ZIndex = 2
+passBox.Parent = loginFrame
+applyDesign(passBox, 8, Theme.Accent2)
+
+local enterBtn = Instance.new("TextButton")
+enterBtn.Size = UDim2.new(0.85, 0, 0, 45)
+enterBtn.Position = UDim2.new(0.075, 0, 0.6, 0)
+enterBtn.Text = "LOGAR"
+enterBtn.BackgroundColor3 = Theme.Accent
+enterBtn.TextColor3 = Color3.new(1,1,1)
+enterBtn.Font = Enum.Font.GothamBold
+enterBtn.ZIndex = 2
+enterBtn.Parent = loginFrame
+applyDesign(enterBtn, 8)
+
+-- ================= MAIN HUB =================
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 580, 0, 360)
+main.Position = UDim2.new(0.5, -290, 0.5, -180)
+main.BackgroundColor3 = Theme.Background
+main.Visible = false
+main.ClipsDescendants = true
+main.Parent = gui
+applyDesign(main, 10, Theme.Accent2)
+
+-- Imagem de Fundo do Hub Principal
+local hubBgImg = Instance.new("ImageLabel")
+hubBgImg.Size = UDim2.new(1, 0, 1, 0)
+hubBgImg.BackgroundTransparency = 1
+hubBgImg.ImageTransparency = 0.75 -- Mais suave no Hub para ler as funções
+hubBgImg.Image = IMAGE_ID
+hubBgImg.ScaleType = Enum.ScaleType.Crop
+hubBgImg.Parent = main
+applyDesign(hubBgImg, 10)
+
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.new(0, 160, 1, 0)
+sidebar.BackgroundColor3 = Theme.Sidebar
+sidebar.BackgroundTransparency = 0.3
+sidebar.ZIndex = 2
+sidebar.Parent = main
+applyDesign(sidebar, 10)
+
+-- Perfil do Player
+local profileFrame = Instance.new("Frame")
+profileFrame.Size = UDim2.new(1, -20, 0, 50)
+profileFrame.Position = UDim2.new(0, 10, 1, -60)
+profileFrame.BackgroundTransparency = 1
+profileFrame.ZIndex = 3
+profileFrame.Parent = sidebar
+
+local playerImg = Instance.new("ImageLabel")
+playerImg.Size = UDim2.new(0, 40, 0, 40)
+playerImg.Position = UDim2.new(0, 0, 0.5, -20)
+playerImg.Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+playerImg.ZIndex = 3
+playerImg.Parent = profileFrame
+applyDesign(playerImg, 100, Theme.Accent)
+
+local playerName = Instance.new("TextLabel")
+playerName.Size = UDim2.new(1, -50, 0, 20)
+playerName.Position = UDim2.new(0, 45, 0.2, 0)
+playerName.Text = player.DisplayName
+playerName.Font = Enum.Font.GothamBold
+playerName.TextSize = 12
+playerName.TextColor3 = Theme.Text
+playerName.TextXAlignment = Enum.TextXAlignment.Left
+playerName.BackgroundTransparency = 1
+playerName.ZIndex = 3
+playerName.Parent = profileFrame
+
+-- ================= SISTEMA DE ABAS =================
+local container = Instance.new("Frame")
+container.Size = UDim2.new(1, -180, 1, -20)
+container.Position = UDim2.new(0, 170, 0, 10)
+container.BackgroundTransparency = 1
+container.ZIndex = 2
+container.Parent = main
+
+local currentTab = nil
+local function createTab(name)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0.9, 0, 0, 35)
+	btn.Position = UDim2.new(0.05, 0, 0, 20 + (#sidebar:GetChildren()-3) * 40)
+	btn.BackgroundTransparency = 1
+	btn.Text = "  " .. name
+	btn.Font = Enum.Font.GothamSemibold
+	btn.TextSize = 14
+	btn.TextColor3 = Theme.SecondaryText
+	btn.TextXAlignment = Enum.TextXAlignment.Left
+	btn.ZIndex = 3
+	btn.Parent = sidebar
+	applyDesign(btn, 6)
+	
+	local page = Instance.new("ScrollingFrame")
+	page.Size = UDim2.new(1, 0, 1, 0)
+	page.BackgroundTransparency = 1
+	page.Visible = false
+	page.ScrollBarThickness = 2
+	page.ScrollBarImageColor3 = Theme.Accent
+	page.ZIndex = 2
+	page.Parent = container
+	
+	local list = Instance.new("UIListLayout")
+	list.Padding = UDim.new(0, 8)
+	list.Parent = page
+
+	btn.MouseButton1Click:Connect(function()
+		if currentTab then currentTab.Visible = false end
+		page.Visible = true
+		currentTab = page
+		for _, v in pairs(sidebar:GetChildren()) do
+			if v:IsA("TextButton") then 
+				v.TextColor3 = Theme.SecondaryText 
+				v.BackgroundTransparency = 1
+			end
+		end
+		btn.TextColor3 = Theme.Text
+		btn.BackgroundColor3 = Theme.Accent
+		btn.BackgroundTransparency = 0.8
+	end)
+	return page
+end
+
+local tabPerf = createTab("Performance")
+local tabSky = createTab("Sky Visual")
+local tabESP = createTab("ESP")
+
+-- ================= FUNÇÕES PERFORMANCE =================
+local function optimize()
+	Lighting.GlobalShadows = false
+	for _, v in pairs(Workspace:GetDescendants()) do
+		if v:IsA("BasePart") and not v:IsDescendantOf(player.Character) then
+			v.Material = Enum.Material.SmoothPlastic
+			v.CastShadow = false
+		end
+		if v:IsA("ParticleEmitter") or v:IsA("Trail") then v.Enabled = false end
+	end
+end
+
+local function removeObjects()
+	for _, obj in pairs(Workspace:GetDescendants()) do
+		local name = obj.Name:lower()
+		if name:find("tree") or name:find("rock") or name:find("bush") then
+			obj:Destroy()
+		end
+	end
+end
+
+local function createPerfButton(text, func, parent)
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1, -10, 0, 45)
+	b.BackgroundColor3 = Theme.Button
+	b.Text = text
+	b.Font = Enum.Font.GothamSemibold
+	b.TextColor3 = Theme.Text
+	b.ZIndex = 3
+	b.Parent = parent
+	applyDesign(b, 8, Theme.Accent)
+	
+	b.MouseButton1Click:Connect(function()
+		func()
+		b.Text = text .. " ATIVADO ✓"
+		b.BackgroundColor3 = Color3.fromRGB(50, 80, 50)
+	end)
+end
+
+createPerfButton("ATIVAR ULTRA LOW POLY", optimize, tabPerf)
+createPerfButton("REMOVER ÁRVORES E PEDRAS", removeObjects, tabPerf)
+
+-- ================= FUNÇÕES SKY =================
+local function applySky(id)
+	for _, old in pairs(Lighting:GetChildren()) do if old:IsA("Sky") then old:Destroy() end end
+	local s = Instance.new("Sky")
+	s.SkyboxBk = id s.SkyboxDn = id s.SkyboxFt = id
+	s.SkyboxLf = id s.SkyboxRt = id s.SkyboxUp = id
+	s.Parent = Lighting
+end
+
+local skies = {
+	{Name = "Ensolarado Anime", ID = "rbxassetid://140664609"},
+	{Name = "Noturno Rosado", ID = "rbxassetid://1206456024"},
+	{Name = "Roxo Galáxia", ID = "rbxassetid://455537903"}
+}
+
+for _, sky in pairs(skies) do
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1, -10, 0, 40)
+	b.BackgroundColor3 = Theme.Button
+	b.Text = "Aplicar " .. sky.Name
+	b.Font = Enum.Font.Gotham
+	b.TextColor3 = Theme.Text
+	b.ZIndex = 3
+	b.Parent = tabSky
+	applyDesign(b, 8, Theme.Accent2)
+	b.MouseButton1Click:Connect(function() applySky(sky.ID) end)
+end
+
+-- ESP (Mantido conforme original)
+local espEnabled = false
+local espBox = true
+local espName = true
+local espHealth = true
+local espObjects = {}
+local camera = workspace.CurrentCamera
+
+local function createESP(player)
+	local drawingTable = {
+		Box = Drawing.new("Square"),
+		Name = Drawing.new("Text"),
+		HealthBar = Drawing.new("Square"),
+		HealthText = Drawing.new("Text")
+	}
+	drawingTable.Box.Thickness = 1
+	drawingTable.Box.Filled = false
+	drawingTable.Box.Color = Color3.new(1, 1, 1)
+	drawingTable.Name.Size = 13
+	drawingTable.Name.Center = true
+	drawingTable.Name.Outline = true
+	drawingTable.Name.Color = Color3.new(1, 1, 1)
+	drawingTable.HealthBar.Thickness = 0
+	drawingTable.HealthBar.Filled = true
+	drawingTable.HealthBar.Color = Color3.new(0, 1, 0)
+	drawingTable.HealthText.Size = 12
+	drawingTable.HealthText.Center = true
+	drawingTable.HealthText.Outline = true
+	drawingTable.HealthText.Color = Color3.new(1, 1, 1)
+	espObjects[player] = drawingTable
+end
+
+local function updateESPForPlayer(plr)
+	if not espEnabled then return end
+	local character = plr.Character
+	if not character then
+		if espObjects[plr] then for _, obj in pairs(espObjects[plr]) do obj.Visible = false end end
+		return
+	end
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local rootPart = character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Torso")
+	if not humanoid or not rootPart then return end
+	local head = character:FindFirstChild("Head")
+	local headPos = head and head.Position or rootPart.Position + Vector3.new(0, 2, 0)
+	local footPos = rootPart.Position - Vector3.new(0, 2, 0)
+	local headScreen, onScreenHead = camera:WorldToViewportPoint(headPos)
+	local footScreen, onScreenFoot = camera:WorldToViewportPoint(footPos)
+	if not (onScreenHead or onScreenFoot) then
+		if espObjects[plr] then for _, obj in pairs(espObjects[plr]) do obj.Visible = false end end
+		return
+	end
+	local height = footScreen.Y - headScreen.Y
+	local width = height * 0.6
+	local boxColor = (plr.TeamColor == player.TeamColor) and Theme.Accent or Theme.Accent2
+	local esp = espObjects[plr]
+	if not esp then return end
+	if espBox then
+		esp.Box.Visible = true
+		esp.Box.Color = boxColor
+		esp.Box.Position = Vector2.new(headScreen.X - width/2, headScreen.Y)
+		esp.Box.Size = Vector2.new(width, height)
+	else esp.Box.Visible = false end
+	if espName then
+		esp.Name.Visible = true
+		esp.Name.Text = plr.Name
+		esp.Name.Position = Vector2.new(headScreen.X, headScreen.Y - 16)
+		esp.Name.Color = boxColor
+	else esp.Name.Visible = false end
+	if espHealth and humanoid then
+		local hp = humanoid.Health / humanoid.MaxHealth
+		esp.HealthBar.Visible = true
+		esp.HealthBar.Color = Color3.new(1-hp, hp, 0)
+		esp.HealthBar.Position = Vector2.new(headScreen.X - width/2, headScreen.Y - 6)
+		esp.HealthBar.Size = Vector2.new(width * hp, 4)
+	else esp.HealthBar.Visible = false end
+end
+
+local espConnection
+local function startESP()
+	if espConnection then espConnection:Disconnect() end
+	espConnection = RunService.RenderStepped:Connect(function()
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if plr ~= player then updateESPForPlayer(plr) end
+		end
+	end)
+end
+
+for _, plr in ipairs(Players:GetPlayers()) do if plr ~= player then createESP(plr) end end
+Players.PlayerAdded:Connect(function(plr) if plr ~= player then createESP(plr) end end)
+
+-- Botões de controle ESP
+local function createToggle(text, varName, parent)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -10, 0, 40)
+	btn.BackgroundColor3 = Theme.Button
+	btn.Text = text .. ": OFF"
+	btn.Font = Enum.Font.Gotham
+	btn.TextColor3 = Theme.Text
+	btn.ZIndex = 3
+	btn.Parent = parent
+	applyDesign(btn, 8, Theme.Accent2)
+	btn.MouseButton1Click:Connect(function()
+		getfenv()[varName] = not getfenv()[varName]
+		btn.Text = text .. ": " .. (getfenv()[varName] and "ON" or "OFF")
+		btn.BackgroundColor3 = getfenv()[varName] and Color3.fromRGB(80, 50, 50) or Theme.Button
+	end)
+end
+
+local masterBtn = Instance.new("TextButton")
+masterBtn.Size = UDim2.new(1, -10, 0, 45)
+masterBtn.BackgroundColor3 = Theme.Button
+masterBtn.Text = "ESP GERAL: OFF"
+masterBtn.Font = Enum.Font.GothamSemibold
+masterBtn.TextColor3 = Theme.Text
+masterBtn.ZIndex = 3
+masterBtn.Parent = tabESP
+applyDesign(masterBtn, 8, Theme.Accent)
+masterBtn.MouseButton1Click:Connect(function()
+	espEnabled = not espEnabled
+	masterBtn.Text = "ESP GERAL: " .. (espEnabled and "ON" or "OFF")
+	if espEnabled then startESP() else if espConnection then espConnection:Disconnect() end end
+end)
+
+createToggle("Caixa", "espBox", tabESP)
+createToggle("Nome", "espName", tabESP)
+createToggle("Vida", "espHealth", tabESP)
+
+-- ================= MINIMIZAR =================
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 45, 0, 45)
+minBtn.Position = UDim2.new(0.02, 0, 0.05, 0)
+minBtn.BackgroundColor3 = Theme.Sidebar
+minBtn.Text = "002"
+minBtn.Font = Enum.Font.GothamBold
+minBtn.TextColor3 = Theme.Accent2
+minBtn.Visible = false
+minBtn.Parent = gui
+applyDesign(minBtn, 10, Theme.Accent)
+
+minBtn.MouseButton1Click:Connect(function()
+	main.Visible = not main.Visible
+end)
+
+enterBtn.MouseButton1Click:Connect(function()
+	if passBox.Text == SENHA_CORRETA then
+		loginFrame:TweenPosition(UDim2.new(0.5, -160, 1, 50), "In", "Quart", 0.5)
+		task.wait(0.5)
+		loginFrame.Visible = false
+		main.Visible = true
+		minBtn.Visible = true
+	end
+end)
