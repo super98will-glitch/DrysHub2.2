@@ -1,4 +1,4 @@
--- 🌌 STRELIZIA HUB V7.0 - O RETORNO (VISUAL ORIGINAL + FIXES)
+-- 🌌 STRELIZIA HUB V7 - O RETORNO (VISUAL ORIGINAL + FIXES)
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
