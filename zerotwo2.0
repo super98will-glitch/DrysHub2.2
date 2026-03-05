@@ -1,0 +1,249 @@
+-- 🌌 STRELIZIA HUB V6.0 - FIX EDITION (ZERO TWO)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local VirtualUser = game:GetService("VirtualUser")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local SENHA_CORRETA = "diegolenda"
+
+-- Configurações de Ativação
+_G.AutoFarm = false
+_G.AutoClick = false
+_G.ESP_Enabled = false
+
+-- Temas (Textos Brancos e Maiores)
+local Theme = {
+    Main = Color3.fromRGB(255, 107, 157),
+    Dark = Color3.fromRGB(15, 15, 15),
+    Secondary = Color3.fromRGB(25, 25, 30),
+    White = Color3.fromRGB(255, 255, 255)
+}
+
+-- ===== LÓGICA DE AUTO CLICK E AUTO FARM =====
+-- Auto Click Real
+spawn(function()
+    while task.wait() do
+        if _G.AutoClick then
+            VirtualUser:CaptureController()
+            VirtualUser:Button1Down(Vector2.new(1280, 672))
+        end
+    end
+end)
+
+-- Auto Farm (Kill Aura / Magnet Base)
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarm then
+            pcall(function()
+                for _, v in pairs(workspace.Enemies:GetChildren()) do
+                    if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
+                        -- Traz o inimigo para sua frente (Magnet)
+                        v.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+                        v.HumanoidRootPart.CanCollide = false
+                        v.Humanoid.WalkSpeed = 0
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- ===== INTERFACE (GUI) =====
+if player.PlayerGui:FindFirstChild("ZeroTwoHub") then player.PlayerGui.ZeroTwoHub:Destroy() end
+local gui = Instance.new("ScreenGui")
+gui.Name = "ZeroTwoHub"
+gui.Parent = player.PlayerGui
+
+local function addDecor(obj, radius, stroke)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    corner.Parent = obj
+    if stroke then
+        local st = Instance.new("UIStroke")
+        st.Color = stroke
+        st.Thickness = 2
+        st.Parent = obj
+    end
+end
+
+-- Função Arrastar
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true dragStart = input.Position startPos = frame.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    frame.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+end
+
+-- Frame Principal
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 600, 0, 380)
+main.Position = UDim2.new(0.5, -300, 0.5, -190)
+main.BackgroundColor3 = Theme.Dark
+main.Visible = false
+main.Parent = gui
+addDecor(main, 12, Theme.Main)
+makeDraggable(main)
+
+-- Título
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Text = "STRELIZIA HUB - ZERO TWO"
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 24
+title.TextColor3 = Theme.White
+title.BackgroundTransparency = 1
+title.Parent = main
+
+-- Sidebar e Container de Abas
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.new(0, 160, 1, -50)
+sidebar.Position = UDim2.new(0, 0, 0, 50)
+sidebar.BackgroundTransparency = 1
+sidebar.Parent = main
+
+local container = Instance.new("Frame")
+container.Size = UDim2.new(1, -170, 1, -60)
+container.Position = UDim2.new(0, 165, 0, 55)
+container.BackgroundTransparency = 1
+container.Parent = main
+
+local function createTab(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 45)
+    btn.Position = UDim2.new(0.05, 0, 0, #sidebar:GetChildren() * 50)
+    btn.BackgroundColor3 = Theme.Secondary
+    btn.Text = name
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.TextColor3 = Theme.White
+    btn.Parent = sidebar
+    addDecor(btn, 8, Theme.Main)
+
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.Visible = false
+    page.BackgroundTransparency = 1
+    page.ScrollBarThickness = 0
+    page.Parent = container
+    
+    local list = Instance.new("UIListLayout")
+    list.Padding = UDim.new(0, 10)
+    list.Parent = page
+
+    btn.MouseButton1Click:Connect(function()
+        for _, p in pairs(container:GetChildren()) do if p:IsA("ScrollingFrame") then p.Visible = false end end
+        page.Visible = true
+    end)
+    return page
+end
+
+local tabFarm = createTab("AUTO FARM")
+local tabESP = createTab("VISUALS")
+local tabPerf = createTab("PERFORMANCE")
+
+-- Funções de Toggle
+local function addToggle(text, parent, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 50)
+    btn.BackgroundColor3 = Theme.Secondary
+    btn.Text = text .. ": OFF"
+    btn.Font = Enum.Font.GothamBlack
+    btn.TextSize = 18
+    btn.TextColor3 = Theme.White
+    btn.Parent = parent
+    addDecor(btn, 8, Theme.Main)
+
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.Text = text .. ": " .. (state and "ON" or "OFF")
+        btn.TextColor3 = state and Theme.Main or Theme.White
+        callback(state)
+    end)
+end
+
+-- Botões de Farm
+addToggle("Auto Attack", tabFarm, function(s) _G.AutoClick = s end)
+addToggle("Kill Aura / Magnet", tabFarm, function(s) _G.AutoFarm = s end)
+
+-- Botões de ESP
+addToggle("Ativar ESP Master", tabESP, function(s) _G.ESP_Enabled = s end)
+
+-- FPS BOOST (Performance)
+local function Boost()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+        if v:IsA("Texture") or v:IsA("Decal") then v:Destroy() end
+        if v.Name == "Tree" or v.Name == "Rock" then v:Destroy() end
+    end
+end
+addToggle("Ultra FPS Boost", tabPerf, function(s) if s then Boost() end end)
+
+-- ===== LÓGICA DO ESP FIXADO =====
+local function CreateESP(plr)
+    local box = Drawing.new("Square")
+    box.Thickness = 2
+    box.Color = Theme.Main
+    box.Filled = false
+    
+    RunService.RenderStepped:Connect(function()
+        if _G.ESP_Enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr ~= player then
+            local root = plr.Character.HumanoidRootPart
+            local pos, onScreen = camera:WorldToViewportPoint(root.Position)
+            
+            if onScreen then
+                local sizeY = (camera:WorldToViewportPoint(root.Position + Vector3.new(0, 3, 0)).Y - camera:WorldToViewportPoint(root.Position + Vector3.new(0, -4, 0)).Y)
+                box.Size = Vector2.new(sizeY * 0.6, sizeY)
+                box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2)
+                box.Visible = true
+            else box.Visible = false end
+        else box.Visible = false end
+    end)
+end
+for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
+Players.PlayerAdded:Connect(CreateESP)
+
+-- ===== LOGIN SIMPLES =====
+local loginFrame = Instance.new("Frame")
+loginFrame.Size = UDim2.new(0, 300, 0, 200)
+loginFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
+loginFrame.BackgroundColor3 = Theme.Dark
+loginFrame.Parent = gui
+addDecor(loginFrame, 12, Theme.Main)
+
+local keyInput = Instance.new("TextBox")
+keyInput.Size = UDim2.new(0.8, 0, 0, 40)
+keyInput.Position = UDim2.new(0.1, 0, 0.3, 0)
+keyInput.PlaceholderText = "KEY: diegolenda"
+keyInput.Text = ""
+keyInput.Font = Enum.Font.GothamBold
+keyInput.TextSize = 16
+keyInput.Parent = loginFrame
+
+local loginBtn = Instance.new("TextButton")
+loginBtn.Size = UDim2.new(0.8, 0, 0, 40)
+loginBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
+loginBtn.Text = "ENTRAR"
+loginBtn.BackgroundColor3 = Theme.Main
+loginBtn.Font = Enum.Font.GothamBlack
+loginBtn.TextColor3 = Theme.White
+loginBtn.Parent = loginFrame
+
+loginBtn.MouseButton1Click:Connect(function()
+    if keyInput.Text == SENHA_CORRETA then
+        loginFrame.Visible = false
+        main.Visible = true
+    end
+end)
