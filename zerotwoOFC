@@ -1,0 +1,309 @@
+-- 🌌 STRELIZIA HUB V8.5 - FAST ATTACK EDITION (ZERO TWO)
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local SENHA_CORRETA = "diegolenda"
+local ASSET_ID = "rbxassetid://102248074514708"
+
+-- ===== ESTADO GLOBAL =====
+_G.AutoFarm = false
+_G.AutoClick = false
+_G.FastAttack = false -- Nova Função
+_G.ESP_Enabled = false
+_G.AntiAFK = true
+
+local Theme = {
+    Main = Color3.fromRGB(255, 107, 157),
+    Dark = Color3.fromRGB(15, 15, 18),
+    Secondary = Color3.fromRGB(25, 25, 30),
+    Accent = Color3.fromRGB(231, 38, 51),
+    White = Color3.fromRGB(255, 255, 255),
+    TextTrans = 0.15 
+}
+
+-- ===== ANTI-AFK =====
+player.Idled:Connect(function()
+    if _G.AntiAFK then
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end
+end)
+
+-- ===== INTERFACE BASE =====
+if player.PlayerGui:FindFirstChild("ZeroTwoHub") then player.PlayerGui.ZeroTwoHub:Destroy() end
+local gui = Instance.new("ScreenGui")
+gui.Name = "ZeroTwoHub"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local function addDecor(obj, radius, stroke)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    corner.Parent = obj
+    if stroke and not obj:IsA("TextButton") and not obj:IsA("TextBox") then
+        local st = Instance.new("UIStroke")
+        st.Color = stroke
+        st.Thickness = 1.2
+        st.Transparency = 0.6
+        st.Parent = obj
+    end
+end
+
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true dragStart = input.Position startPos = frame.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    frame.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+end
+
+-- ================= LOGIN =================
+local loginFrame = Instance.new("Frame")
+loginFrame.Size = UDim2.new(0, 320, 0, 380)
+loginFrame.Position = UDim2.new(0.5, -160, 0.5, -190)
+loginFrame.BackgroundColor3 = Theme.Dark
+loginFrame.Parent = gui
+addDecor(loginFrame, 12, Theme.Main)
+makeDraggable(loginFrame)
+
+local loginBg = Instance.new("ImageLabel")
+loginBg.Size = UDim2.new(1, 0, 1, 0)
+loginBg.Image = ASSET_ID
+loginBg.ImageTransparency = 0.5
+loginBg.BackgroundTransparency = 1
+loginBg.ScaleType = Enum.ScaleType.Crop
+loginBg.Parent = loginFrame
+addDecor(loginBg, 12)
+
+local loginTitle = Instance.new("TextLabel")
+loginTitle.Size = UDim2.new(1, 0, 0, 80)
+loginTitle.Text = "STRELIZIA"
+loginTitle.Font = Enum.Font.GothamBlack
+loginTitle.TextSize = 32
+loginTitle.TextColor3 = Theme.White
+loginTitle.TextTransparency = Theme.TextTrans
+loginTitle.BackgroundTransparency = 1
+loginTitle.Parent = loginFrame
+
+local keyInput = Instance.new("TextBox")
+keyInput.Size = UDim2.new(0.8, 0, 0, 40)
+keyInput.Position = UDim2.new(0.1, 0, 0.45, 0)
+keyInput.PlaceholderText = "INSIRA A KEY"
+keyInput.Text = ""
+keyInput.Font = Enum.Font.GothamBold
+keyInput.TextSize = 14
+keyInput.BackgroundColor3 = Theme.Secondary
+keyInput.TextColor3 = Theme.White
+keyInput.Parent = loginFrame
+addDecor(keyInput, 8)
+
+local loginBtn = Instance.new("TextButton")
+loginBtn.Size = UDim2.new(0.8, 0, 0, 45)
+loginBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
+loginBtn.Text = "ENTRAR"
+loginBtn.Font = Enum.Font.GothamBlack
+loginBtn.TextSize = 16
+loginBtn.BackgroundColor3 = Theme.Main
+loginBtn.TextColor3 = Theme.White
+loginBtn.Parent = loginFrame
+addDecor(loginBtn, 8)
+
+-- ================= HUB PRINCIPAL =================
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 580, 0, 350)
+main.Position = UDim2.new(0.5, -290, 0.5, -175)
+main.BackgroundColor3 = Theme.Dark
+main.Visible = false
+main.Parent = gui
+addDecor(main, 10, Theme.Main)
+makeDraggable(main)
+
+local hubBg = loginBg:Clone()
+hubBg.ImageTransparency = 0.8
+hubBg.Parent = main
+
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 45, 0, 45)
+minBtn.Position = UDim2.new(0.02, 0, 0.05, 0)
+minBtn.BackgroundColor3 = Theme.Main
+minBtn.Text = "002"
+minBtn.Font = Enum.Font.GothamBlack
+minBtn.TextSize = 14
+minBtn.TextColor3 = Theme.White
+minBtn.ZIndex = 100
+minBtn.Visible = false
+minBtn.Parent = gui
+addDecor(minBtn, 22, Theme.White)
+minBtn.MouseButton1Click:Connect(function() main.Visible = not main.Visible end)
+
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.new(0, 150, 1, 0)
+sidebar.BackgroundColor3 = Theme.Secondary
+sidebar.BackgroundTransparency = 0.3
+sidebar.Parent = main
+addDecor(sidebar, 10)
+
+local container = Instance.new("Frame")
+container.Size = UDim2.new(1, -170, 1, -20)
+container.Position = UDim2.new(0, 160, 0, 10)
+container.BackgroundTransparency = 1
+container.Parent = main
+
+local function createTab(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Position = UDim2.new(0.05, 0, 0, 70 + (#sidebar:GetChildren()-1) * 40)
+    btn.BackgroundTransparency = 1
+    btn.Text = "  " .. name
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 13
+    btn.TextColor3 = Theme.White
+    btn.TextTransparency = 0.3
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.Parent = sidebar
+
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.Visible = false
+    page.ScrollBarThickness = 0
+    page.Parent = container
+
+    btn.MouseButton1Click:Connect(function()
+        for _, p in pairs(container:GetChildren()) do if p:IsA("ScrollingFrame") then p.Visible = false end end
+        page.Visible = true
+        for _, b in pairs(sidebar:GetChildren()) do if b:IsA("TextButton") then b.TextTransparency = 0.3 end end
+        btn.TextTransparency = 0
+    end)
+    
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 8)
+    layout.Parent = page
+    return page
+end
+
+local tabFarm = createTab("AUTO FARM")
+local tabESP = createTab("VISUALS")
+local tabPerf = createTab("PERFORMANCE")
+
+-- ================= FUNÇÕES DE COMBATE & FAST ATTACK =================
+local function addToggle(text, parent, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 45)
+    btn.BackgroundColor3 = Theme.Secondary
+    btn.Text = text .. ": OFF"
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    btn.TextColor3 = Theme.White
+    btn.TextTransparency = Theme.TextTrans
+    btn.Parent = parent
+    addDecor(btn, 6)
+
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.Text = text .. ": " .. (state and "ON" or "OFF")
+        btn.TextColor3 = state and Theme.Main or Theme.White
+        btn.TextTransparency = 0
+        callback(state)
+    end)
+end
+
+-- Lógica do Fast Attack
+spawn(function()
+    while task.wait() do
+        if _G.FastAttack then
+            pcall(function()
+                local combat = player.Character:FindFirstChildOfClass("Tool")
+                if combat then
+                    -- Simula o evento de ataque do jogo em alta velocidade
+                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("weaponChange", combat.Name)
+                end
+            end)
+        end
+    end
+end)
+
+-- Auto Click Real
+spawn(function()
+    while task.wait() do
+        if _G.AutoClick then
+            VirtualUser:Button1Down(Vector2.new(1280, 672))
+        end
+    end
+end)
+
+-- Kill Aura/Magnet
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarm then
+            pcall(function()
+                for _, v in pairs(workspace.Enemies:GetChildren()) do
+                    if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                        v.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+                        v.HumanoidRootPart.CanCollide = false
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+addToggle("Auto Attack", tabFarm, function(s) _G.AutoClick = s end)
+addToggle("Fast Attack", tabFarm, function(s) _G.FastAttack = s end)
+addToggle("Kill Aura", tabFarm, function(s) _G.AutoFarm = s end)
+
+-- ================= VISUALS (ESP) =================
+local function CreateESP(plr)
+    local box = Drawing.new("Square")
+    box.Thickness = 1.5
+    box.Color = Theme.Main
+    box.Visible = false
+    
+    RunService.RenderStepped:Connect(function()
+        if _G.ESP_Enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr ~= player then
+            local pos, onScreen = camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+            if onScreen then
+                box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z)
+                box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2)
+                box.Visible = true
+            else box.Visible = false end
+        else box.Visible = false end
+    end)
+end
+
+addToggle("Ativar ESP", tabESP, function(s) _G.ESP_Enabled = s end)
+for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end
+Players.PlayerAdded:Connect(CreateESP)
+
+-- ================= PERFORMANCE =================
+addToggle("Ultra FPS Boost", tabPerf, function(s)
+    if s then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+            if v:IsA("Texture") or v:IsA("Decal") then v:Destroy() end
+        end
+    end
+end)
+
+-- Ação de Login
+loginBtn.MouseButton1Click:Connect(function()
+    if keyInput.Text == SENHA_CORRETA then
+        loginFrame.Visible = false
+        main.Visible = true
+        minBtn.Visible = true
+    end
+end)
