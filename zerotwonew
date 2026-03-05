@@ -1,0 +1,293 @@
+-- 🌌 ZERO TWO X DRYX HUB - V5.5 PREMIUM (WHITE TEXT EDITION)
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local camera = Workspace.CurrentCamera
+local SENHA_CORRETA = "diegolenda"
+local ASSET_ID = "rbxassetid://102248074514708"
+
+-- ===== CONFIGURAÇÕES GLOBAIS =====
+local _G = {
+    AutoFarm = false,
+    AutoClick = false,
+    AntiAFK = true
+}
+
+-- ===== PALETA DE CORES =====
+local Theme = {
+    Main = Color3.fromRGB(255, 107, 157),   -- Rosa Zero Two
+    Dark = Color3.fromRGB(18, 18, 22),      -- Fundo
+    Secondary = Color3.fromRGB(25, 25, 30), -- Sidebar
+    Accent = Color3.fromRGB(231, 38, 51),   -- Vermelho (Botão X)
+    White = Color3.fromRGB(255, 255, 255),  -- Texto Principal
+    TextGray = Color3.fromRGB(220, 220, 220) -- Texto secundário mais claro
+}
+
+-- Limpeza de UI anterior
+if player.PlayerGui:FindFirstChild("ZeroTwoHub") then player.PlayerGui.ZeroTwoHub:Destroy() end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "ZeroTwoHub"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- ===== FUNÇÕES DE DESIGN & DRAG =====
+local function addDecor(obj, radius, stroke, transparency)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    corner.Parent = obj
+    if stroke then
+        local uistroke = Instance.new("UIStroke")
+        uistroke.Thickness = 1.8
+        uistroke.Color = stroke
+        uistroke.Transparency = transparency or 0.4
+        uistroke.Parent = obj
+    end
+end
+
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            local targetPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.X.Scale, startPos.Y.Offset + delta.Y)
+            TweenService:Create(frame, TweenInfo.new(0.12), {Position = targetPos}):Play()
+        end
+    end)
+end
+
+-- Anti-AFK
+player.Idled:Connect(function()
+    if _G.AntiAFK then
+        game:GetService("VirtualUser"):CaptureController()
+        game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+    end
+end)
+
+-- ================= LOGIN =================
+local loginFrame = Instance.new("Frame")
+loginFrame.Size = UDim2.new(0, 360, 0, 420)
+loginFrame.Position = UDim2.new(0.5, -180, 0.5, -210)
+loginFrame.BackgroundColor3 = Theme.Dark
+loginFrame.Parent = gui
+addDecor(loginFrame, 15, Theme.Main, 0.3)
+makeDraggable(loginFrame)
+
+local bgImg = Instance.new("ImageLabel")
+bgImg.Size = UDim2.new(1, 0, 1, 0)
+bgImg.Image = ASSET_ID
+bgImg.ImageTransparency = 0.6
+bgImg.BackgroundTransparency = 1
+bgImg.ScaleType = Enum.ScaleType.Crop
+bgImg.Parent = loginFrame
+addDecor(bgImg, 15)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 100)
+title.Text = "STRELIZIA"
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 42
+title.TextColor3 = Theme.White
+title.BackgroundTransparency = 1
+title.ZIndex = 2
+title.Parent = loginFrame
+
+local passInput = Instance.new("TextBox")
+passInput.Size = UDim2.new(0.8, 0, 0, 50)
+passInput.Position = UDim2.new(0.1, 0, 0.45, 0)
+passInput.PlaceholderText = "INSIRA A KEY"
+passInput.Text = ""
+passInput.TextSize = 18
+passInput.Font = Enum.Font.GothamBold
+passInput.BackgroundColor3 = Theme.Secondary
+passInput.TextColor3 = Theme.White
+passInput.ZIndex = 2
+passInput.Parent = loginFrame
+addDecor(passInput, 10, Theme.Main, 0.6)
+
+local loginBtn = Instance.new("TextButton")
+loginBtn.Size = UDim2.new(0.8, 0, 0, 55)
+loginBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
+loginBtn.Text = "CONECTAR"
+loginBtn.Font = Enum.Font.GothamBlack
+loginBtn.TextSize = 22
+loginBtn.TextColor3 = Theme.White
+loginBtn.BackgroundColor3 = Theme.Main
+loginBtn.ZIndex = 2
+loginBtn.Parent = loginFrame
+addDecor(loginBtn, 10)
+
+-- ================= HUB PRINCIPAL =================
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 640, 0, 400)
+main.Position = UDim2.new(0.5, -320, 0.5, -200)
+main.BackgroundColor3 = Theme.Dark
+main.Visible = false
+main.Parent = gui
+addDecor(main, 12, Theme.Main, 0.4)
+makeDraggable(main)
+
+local hubBg = bgImg:Clone()
+hubBg.ImageTransparency = 0.8
+hubBg.Parent = main
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 40, 0, 40)
+closeBtn.Position = UDim2.new(1, -50, 0, 10)
+closeBtn.BackgroundColor3 = Theme.Accent
+closeBtn.Text = "X"
+closeBtn.Font = Enum.Font.GothamBlack
+closeBtn.TextSize = 22
+closeBtn.TextColor3 = Theme.White
+closeBtn.ZIndex = 10
+closeBtn.Parent = main
+addDecor(closeBtn, 10, Theme.White)
+closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
+
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.new(0, 180, 1, 0)
+sidebar.BackgroundColor3 = Theme.Secondary
+sidebar.BackgroundTransparency = 0.2
+sidebar.ZIndex = 2
+sidebar.Parent = main
+addDecor(sidebar, 12)
+
+local container = Instance.new("Frame")
+container.Size = UDim2.new(1, -210, 1, -40)
+container.Position = UDim2.new(0, 200, 0, 20)
+container.BackgroundTransparency = 1
+container.ZIndex = 2
+container.Parent = main
+
+-- Sistema de Abas
+local currentTab = nil
+local function createTab(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 45)
+    btn.Position = UDim2.new(0.05, 0, 0, 60 + (#sidebar:GetChildren()-1) * 50)
+    btn.BackgroundTransparency = 1
+    btn.Text = "  " .. name
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18 -- Aumentado
+    btn.TextColor3 = Theme.TextGray
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.ZIndex = 3
+    btn.Parent = sidebar
+
+    local page = Instance.new("ScrollingFrame")
+    page.Size = UDim2.new(1, 0, 1, 0)
+    page.BackgroundTransparency = 1
+    page.Visible = false
+    page.ScrollBarThickness = 0
+    page.Parent = container
+
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 12)
+    layout.Parent = page
+
+    btn.MouseButton1Click:Connect(function()
+        if currentTab then currentTab.Visible = false end
+        page.Visible = true
+        currentTab = page
+        for _, v in pairs(sidebar:GetChildren()) do
+            if v:IsA("TextButton") then v.TextColor3 = Theme.TextGray end
+        end
+        btn.TextColor3 = Theme.White
+    end)
+    return page
+end
+
+local tabFarm = createTab("Blox Fruits")
+local tabESP = createTab("Visuals ESP")
+local tabPerf = createTab("Performance")
+
+-- ================= PERFORMANCE: ULTRA FPS BOOST =================
+local function ApplyFPSBoost()
+    Lighting.GlobalShadows = false
+    for _, effect in pairs(Lighting:GetChildren()) do
+        if effect:IsA("PostEffect") or effect:IsA("Bloom") or effect:IsA("Blur") then effect.Enabled = false end
+    end
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Material = Enum.Material.SmoothPlastic
+            obj.CastShadow = false
+        end
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then obj.Enabled = false end
+        local name = obj.Name:lower()
+        if name:find("tree") or name:find("rock") or name:find("bush") or name:find("grass") then obj:Destroy() end
+    end
+end
+
+local boostBtn = Instance.new("TextButton")
+boostBtn.Size = UDim2.new(1, -10, 0, 55)
+boostBtn.BackgroundColor3 = Theme.Secondary
+boostBtn.Text = "🚀 ATIVAR ULTRA FPS BOOST"
+boostBtn.Font = Enum.Font.GothamBlack
+boostBtn.TextSize = 20
+boostBtn.TextColor3 = Theme.White
+boostBtn.Parent = tabPerf
+addDecor(boostBtn, 10, Theme.Main, 0.7)
+boostBtn.MouseButton1Click:Connect(function()
+    ApplyFPSBoost()
+    boostBtn.Text = "BOOST ATIVADO ✓"
+    boostBtn.BackgroundColor3 = Color3.fromRGB(40, 100, 40)
+end)
+
+-- ================= BLOX FRUITS & ESP =================
+local function addToggle(name, var, parent)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 50)
+    btn.BackgroundColor3 = Theme.Secondary
+    btn.Text = name .. ": OFF"
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.TextColor3 = Theme.White
+    btn.Parent = parent
+    addDecor(btn, 8, Theme.Main, 0.7)
+    btn.MouseButton1Click:Connect(function()
+        _G[var] = not _G[var]
+        btn.Text = name .. ": " .. (_G[var] and "ON" or "OFF")
+        btn.TextColor3 = Theme.White
+        btn.BackgroundColor3 = _G[var] and Color3.fromRGB(100, 50, 70) or Theme.Secondary
+    end)
+end
+
+addToggle("Auto Farm Level", "AutoFarm", tabFarm)
+addToggle("Auto Click Attack", "AutoClick", tabFarm)
+
+-- Loop de Ataque
+spawn(function()
+    while task.wait() do
+        if _G.AutoClick then
+            game:GetService("VirtualUser"):CaptureController()
+            game:GetService("VirtualUser"):ClickButton1(Vector2.new())
+        end
+    end
+end)
+
+-- Lógica de Login Final
+loginBtn.MouseButton1Click:Connect(function()
+    if passInput.Text == SENHA_CORRETA then
+        loginFrame:TweenPosition(UDim2.new(0.5, -180, 1.2, 0), "In", "Back", 0.5)
+        task.wait(0.5)
+        main.Visible = true
+    end
+end)
